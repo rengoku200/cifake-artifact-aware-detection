@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Don’t push raw data (CIFAKE) – teammates download from Kaggle
+data/
+
+# Don’t push large model files
+*.pt
+*.pth
