@@ -15,8 +15,8 @@ Create virtual environment (python3 -m venv venv)
 Install required packages (torch, torchvision, pillow, numpy, etc.)
 
 2. Download and prepare CIFAKE dataset
-Download dataset from Kaggle
-Place into:
+Download dataset from Kaggle by running downloadImage.py
+Place into: ../data folder
 
 3. Implement PyTorch dataset + dataloader
 Write CIFAKEDataset class
