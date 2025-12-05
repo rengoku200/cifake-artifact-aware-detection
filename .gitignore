@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Don’t commit raw data
+data/
+
+# Don’t commit model weights
+*.pt
+*.pth
