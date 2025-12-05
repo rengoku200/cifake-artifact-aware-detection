@@ -3,9 +3,9 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# Don’t push raw data (CIFAKE) – teammates download from Kaggle
+# Don’t commit raw data
 data/
 
-# Don’t push large model files
+# Don’t commit model weights
 *.pt
 *.pth
