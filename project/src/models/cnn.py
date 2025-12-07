@@ -20,13 +20,16 @@ class CIFAKECNN(nn.Module):
         # After conv1+pool: 32x16x16
         # After conv2+pool: 32x8x8  → 32 * 8 * 8 = 2048
         self.fc1 = nn.Linear(32 * 8 * 8, 64)
-        self.fc2 = nn.Linear(64, 1)  # final Dense (Sigmoid in forward)
+        self.fc2 = nn.Linear(64, 2)  # final Dense (Sigmoid in forward)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))  # (B, 32, 16,16)
-        x = self.pool(F.relu(self.conv2(x)))  # (B, 32,  8, 8)
+      # Ensure spatial size = 32x32 regardless of external preprocessing
+        x = F.interpolate(x, size=(32, 32), mode="bilinear", align_corners=False)
 
-        x = x.view(x.size(0), -1)            
-        x = F.relu(self.fc1(x))               
-        x = torch.sigmoid(self.fc2(x))        
-        return x                             
+        x = self.pool(F.relu(self.conv1(x)))  # (B, 32, 16, 16)
+        x = self.pool(F.relu(self.conv2(x)))  # (B, 32,  8,  8)
+
+        x = x.view(x.size(0), -1)            # (B, 2048)
+        x = F.relu(self.fc1(x))              # (B, 64)
+        logits = self.fc2(x)                 # (B, 2) raw logits
+        return logits

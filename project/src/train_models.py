@@ -2,11 +2,14 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
+import os 
 from tqdm import tqdm
 
 
 from dataset import CIFAKEDataset
-from models.baseline_cnn import BaselineCNN 
+from models.artifact_aware_cnn import ArtifactAwareCNN
+from models.baseline_cnn import BaselineCNN
+from models.cnn import CIFAKECNN
 
 
 
@@ -56,8 +59,8 @@ def train_model(model, train_loader, criterion, optimizer, device):
 
 
     for imgs, labels in tqdm(train_loader, desc="Training", leave=False):
-        imgs.to(device)
-        labels.to(device)
+        imgs = imgs.to(device)
+        labels =labels.to(device)
 
 
         optimizer.zero_grad()
@@ -98,8 +101,8 @@ def evaluate_model(model, test_loader, criterion, device):
 
     with torch.no_grad():
         for imgs, labels in tqdm(test_loader, desc="Evaluating", leave=False):
-            imgs.to(device)
-            labels.to(device)
+            imgs = imgs.to(device)
+            labels = labels.to(device)
 
             outputs = model(imgs)
             loss = criterion(outputs, labels)
@@ -114,19 +117,43 @@ def evaluate_model(model, test_loader, criterion, device):
     return avg_loss, accuracy
 
 
-def main():
-    """Main training loop."""
+def main(model_type="artifact"):
+    """
+    model_type: "baseline", "paper", or "artifact"
+    """
+    if torch.backends.mps.is_available():
+      device = torch.device("mps")
+      print("Using Apple Silicon GPU (MPS)")
+    else:
+        device = torch.device("cpu")
+        print("Using CPU")
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
+    print("Device:", device)
+
+
 
     train_loader, test_loader = get_dataloaders(root_dir="../data", batch_size=64)
 
-    model = BaselineCNN().to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    if model_type == "baseline":
+        print("Training BaselineCNN...")
+        model = BaselineCNN().to(device)
+        ckpt_name = "baseline_cnn.pt"
 
-    num_epochs = 2
+    elif model_type == "paper":
+        print("Training paper CNN (CIFAKECNN)...")
+        model = CIFAKECNN().to(device)
+        ckpt_name = "paper_cnn.pt"
+
+    else:
+        print("Training ArtifactAwareCNN...")
+        model = ArtifactAwareCNN().to(device)
+        ckpt_name = "artifact_aware_cnn.pt"
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    num_epochs = 20
+
     for epoch in range(1, num_epochs + 1):
         print(f"\nEpoch {epoch}/{num_epochs}")
         train_loss, train_acc = train_model(model, train_loader, criterion, optimizer, device)
@@ -134,10 +161,19 @@ def main():
 
         print(f"Train loss: {train_loss:.4f} | Train acc: {train_acc:.4f}")
         print(f"Val   loss: {val_loss:.4f} | Val   acc: {val_acc:.4f}")
+        
+    #Saving trained models for interpretability later
+    os.makedirs("../checkpoints", exist_ok=True)
+    ckpt_path = os.path.join("../checkpoints", ckpt_name)
+    torch.save(model.state_dict(), ckpt_path)
+    print(f"Saved {model_type} model to {ckpt_path}")
 
 
 if __name__ == "__main__":
-    main()
+    # choose which model to train
+    # "baseline", "paper", or "artifact"
+    main(model_type="artifact")
+
 
 
 
