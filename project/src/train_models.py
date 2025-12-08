@@ -10,10 +10,11 @@ from dataset import CIFAKEDataset
 from models.artifact_aware_cnn import ArtifactAwareCNN
 from models.baseline_cnn import BaselineCNN
 from models.cnn import CIFAKECNN
+from models.vgg16 import VGG16CIFAKE
 
 
 
-def get_dataloaders(root_dir="../data", batch_size=64):
+def get_dataloaders(root_dir="../data", batch_size=64, model_type = "vgg16"):
     """
     Creates pytorch dataloaders for traning and testing datasets.
     Parameters:
@@ -29,9 +30,25 @@ def get_dataloaders(root_dir="../data", batch_size=64):
         T.Resize((128, 128)),
         T.ToTensor(),
     ])
-    train_dataset = CIFAKEDataset(root_dir=root_dir, split="train", transform=transform)
-    test_dataset = CIFAKEDataset(root_dir=root_dir, split="test", transform=transform)
 
+    """
+    VGG16 expects 224*224 RGB and ImageNet normalization so we need a different transform
+    """
+    vgg_transform = T.Compose([
+    T.Resize((224, 224)),
+    T.ToTensor(),
+    T.Normalize(mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]),
+    ])
+    
+    if model_type=="vgg16":
+
+        train_dataset = CIFAKEDataset(root_dir=root_dir, split="train", transform=vgg_transform)
+        test_dataset = CIFAKEDataset(root_dir=root_dir, split="test", transform=vgg_transform)
+    else:
+        train_dataset = CIFAKEDataset(root_dir=root_dir, split="train", transform=transform)
+        test_dataset = CIFAKEDataset(root_dir=root_dir, split="test", transform=transform)
+        
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -117,9 +134,9 @@ def evaluate_model(model, test_loader, criterion, device):
     return avg_loss, accuracy
 
 
-def main(model_type="artifact"):
+def main(model_type="baseline"):
     """
-    model_type: "baseline", "paper", or "artifact"
+    model_type: "baseline", "paper", "vgg", or "artifact"
     """
     if torch.backends.mps.is_available():
       device = torch.device("mps")
@@ -132,7 +149,7 @@ def main(model_type="artifact"):
 
 
 
-    train_loader, test_loader = get_dataloaders(root_dir="../data", batch_size=64)
+    train_loader, test_loader = get_dataloaders(root_dir="../data", batch_size=64, model_type=model_type)
 
     if model_type == "baseline":
         print("Training BaselineCNN...")
@@ -144,6 +161,11 @@ def main(model_type="artifact"):
         model = CIFAKECNN().to(device)
         ckpt_name = "paper_cnn.pt"
 
+    elif model_type=="vgg16":
+        print("Training VGG16CIFAKE...")
+        model = VGG16CIFAKE(pretrained=True, freeze_backbone=True).to(device)
+        ckpt_name = "vgg16.pt"
+
     else:
         print("Training ArtifactAwareCNN...")
         model = ArtifactAwareCNN().to(device)
@@ -152,7 +174,10 @@ def main(model_type="artifact"):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-    num_epochs = 20
+    if model_type=="vgg16":
+        num_epochs = 5
+    else:
+        num_epochs = 20
 
     for epoch in range(1, num_epochs + 1):
         print(f"\nEpoch {epoch}/{num_epochs}")
@@ -171,8 +196,8 @@ def main(model_type="artifact"):
 
 if __name__ == "__main__":
     # choose which model to train
-    # "baseline", "paper", or "artifact"
-    main(model_type="artifact")
+    # "baseline", "paper", "vgg16", or "artifact"
+    main(model_type="vgg16")
 
 
 
