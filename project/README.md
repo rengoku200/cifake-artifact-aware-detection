@@ -299,3 +299,26 @@ Val   loss: 0.1438 | Val   acc: 0.9444
 Epoch 19/20
 Train loss: 0.0959 | Train acc: 0.9629                                                                                      
 Val   loss: 0.1261 | Val   acc: 0.9516
+
+
+Training VGG16CIFAKE...
+
+Epoch 1/5
+Train loss: 0.2591 | Train acc: 0.8997                                                                                  
+Val   loss: 0.1607 | Val   acc: 0.9452
+
+Epoch 2/5
+Train loss: 0.1613 | Train acc: 0.9423                                                                                  
+Val   loss: 0.1385 | Val   acc: 0.9491
+
+Epoch 3/5
+Train loss: 0.1203 | Train acc: 0.9575                                                                                  
+Val   loss: 0.1332 | Val   acc: 0.9523
+
+Epoch 4/5
+Train loss: 0.0978 | Train acc: 0.9668                                                                                  
+Val   loss: 0.1389 | Val   acc: 0.9532
+
+Epoch 5/5
+Train loss: 0.0820 | Train acc: 0.9730                                                                                  
+Val   loss: 0.1252 | Val   acc: 0.9563
