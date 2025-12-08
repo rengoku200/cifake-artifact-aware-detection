@@ -11,6 +11,7 @@ from dataset import CIFAKEDataset
 from models.baseline_cnn import BaselineCNN
 from models.cnn import CIFAKECNN       
 from models.artifact_aware_cnn import ArtifactAwareCNN
+from models.vgg16 import VGG16CIFAKE
 
 
 def load_model(model_name, device=None):
@@ -18,6 +19,7 @@ def load_model(model_name, device=None):
     Loads any trained model by name:
     - 'baseline'
     - 'paper'
+    - 'vgg'
     - 'artifact'
     """
 
@@ -36,6 +38,10 @@ def load_model(model_name, device=None):
         model = ArtifactAwareCNN().to(device)
         ckpt = "../checkpoints/artifact_aware_cnn.pt"
 
+    elif model_name == "vgg16":
+        model = VGG16CIFAKE().to(device)
+        ckpt = "../checkpoints/vgg16.pt"
+    
     else:
         raise ValueError(f"Unknown model_name: {model_name}")
 
@@ -47,13 +53,22 @@ def load_model(model_name, device=None):
     return model
 
 
-def get_sample(batch_size=1):
+def get_sample(batch_size=1, model_name="artifact"):
     transform = T.Compose([
         T.Resize((128, 128)),
         T.ToTensor(),
     ])
+    vgg_transform = T.Compose([
+    T.Resize((224, 224)),
+    T.ToTensor(),
+    T.Normalize(mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]),
+    ])
 
-    test_ds = CIFAKEDataset(root_dir="../data", split="test", transform=transform)
+    if model_name=="vgg16":
+        test_ds = CIFAKEDataset(root_dir="../data", split="test", transform=vgg_transform)
+    else:
+        test_ds = CIFAKEDataset(root_dir="../data", split="test", transform=transform)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=True)
 
     return next(iter(test_loader))
@@ -164,7 +179,7 @@ def frequency_ablation(model, img, device):
 
 
 
-def main(model_name="artifact"):
+def main(model_name="vgg16"):
     if torch.backends.mps.is_available():
       device = torch.device("mps")
       print("Using Apple Silicon GPU (MPS)")
@@ -175,7 +190,7 @@ def main(model_name="artifact"):
     print("Device:", device)
 
     model = load_model(model_name, device)
-    imgs, labels = get_sample(batch_size=1)
+    imgs, labels = get_sample(batch_size=1, model_name=model_name)
     img = imgs[0:1]
     label = labels[0]
 
@@ -192,5 +207,5 @@ def main(model_name="artifact"):
 
 
 if __name__ == "__main__":
-    # change to "baseline", "paper", or "artifact"
+    # change to "baseline", "paper", "vgg", or "artifact"
     main(model_name="artifact")
