@@ -16,10 +16,9 @@ class BaselineCNN(nn.Module):
         self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
 
-        # 128 x 16 x 16 if we do 3 pools on 128x128:
         # 128 -> 64 -> 32 -> 16
         self.fc1 = nn.Linear(128 * 16 * 16, 256)
-        self.fc2 = nn.Linear(256, 2)  # 2 classes: real, fake
+        self.fc2 = nn.Linear(256, 2) 
 
     def forward(self, x):
         

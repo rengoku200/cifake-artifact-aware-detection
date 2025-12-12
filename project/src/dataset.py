@@ -25,7 +25,7 @@ class CIFAKEDataset(Dataset):
             if fname.lower().endswith((".png", ".jpg", ".jpeg")):
                 self.samples.append((os.path.join(self.fake_dir, fname), 1))
 
-        # simple transform 
+        
         self.transform = transform or T.Compose([
             T.Resize((128, 128)),
             T.ToTensor(),

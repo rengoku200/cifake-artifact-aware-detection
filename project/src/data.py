@@ -7,8 +7,8 @@ def test_loader():
     loader = DataLoader(dataset, batch_size=4, shuffle=True)
 
     for imgs, labels in loader:
-        print("Batch image tensor shape:", imgs.shape)   # expect [4, 3, 128, 128]
-        print("Batch labels:", labels)                   # expect 0s and 1s
+        print("Batch image tensor shape:", imgs.shape)  
+        print("Batch labels:", labels)                 
         break
 
 

@@ -52,8 +52,7 @@ class ArtifactAwareCNN(nn.Module):
         self.spatial_branch = SpatialBranch(in_channels=3, base_channels=base_channels)
         self.freq_branch = FreqBranch(in_channels=3, base_channels=base_channels)
 
-        # Each branch ends with C = base_channels * 2
-        # so concatenation doubles the channels.
+        
         fused_channels = base_channels*4 
 
         self.cbam_fusion = CBAMBlock(fused_channels)
@@ -68,7 +67,6 @@ class ArtifactAwareCNN(nn.Module):
         #Frequency featues
         freq_feat = self.freq_branch(x)
 
-        # fuse along channel and spatial dimensions
         fused = torch.cat([spatial_feat, freq_feat], dim=1)
 
         #CBAM attention

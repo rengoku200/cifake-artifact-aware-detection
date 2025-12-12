@@ -195,7 +195,6 @@ def main(model_type="baseline"):
 
 
 if __name__ == "__main__":
-    # choose which model to train
     # "baseline", "paper", "vgg16", or "artifact"
     main(model_type="vgg16")
 

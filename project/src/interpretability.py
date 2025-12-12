@@ -107,7 +107,7 @@ def run_ig(model, img, label, device):
 
     def forward_fn(x):
         logits = model(x)
-        return logits[:, label.item()]  # logit for class
+        return logits[:, label.item()]  
 
     ig = IntegratedGradients(forward_fn)
 
