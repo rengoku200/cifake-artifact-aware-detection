@@ -6,6 +6,8 @@ Installs---
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
     pip install pillow numpy matplotlib tqdm scikit-learn captum
 
+1. Run train_models.py first a # if epochs switching between models in main
+2. Run interpretaibility to get visulaizations for each of the models and switch usingmain
 
 
 
@@ -322,3 +324,7 @@ Val   loss: 0.1389 | Val   acc: 0.9532
 Epoch 5/5
 Train loss: 0.0820 | Train acc: 0.9730                                                                                  
 Val   loss: 0.1252 | Val   acc: 0.9563
+
+
+
+
